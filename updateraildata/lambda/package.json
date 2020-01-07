@@ -1,0 +1,18 @@
+{
+  "name": "dynamocreaterailtables_lambda",
+  "version": "1.0.1",
+  "description": "",
+  "main": "dynamo_create_rail_tables.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "graphql-request": "^1.4.0",
+    "node-fetch": "^1.7.3",
+    "promisify-node": "^0.4.0",
+    "stream-buffers": "^3.0.1",
+    "unzip": "^0.1.11"
+  }
+}

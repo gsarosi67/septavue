@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="apple-touch-icon" href="apple-touch-icon.png">
+      <link rel="icon" href="AWT-Train64bl.png">
+      <!-- development version, includes helpful console warnings -->
+      <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+      <!-- production version, optimized for size and speed
+      <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+      <script src='https://cdn.rawgit.com/github/fetch/v0.9.0/fetch.js'></script>
+      <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+      <script type='text/javascript' src='raildata.js?ver=7'></script>
+      <link rel="stylesheet" type="text/css" href="septa.css?ver=17" />
+   </head>
+
+   <body>
+		<div class="view" id="trainvue" >
+		    <div class='header'>
+               <div class='clock'>{{ currenttime }}</div>
+               <div class='title'><img src='AWT-Train200.png' width='100'>SEPTAVue</div>
+          </div>
+          <button class='button1' v-on:click=toggleControl()></button>
+          </br></br>
+		    <template v-if="controlson">
+		    <div class=controls>
+		       <div class='contain5lr'>
+		           <div class='contain5'>
+					   <label for='keystation'>My Station</label>
+					   </br>
+					   <select id='keystation' v-model='keystation'>
+						  <option v-for="station in stations" v-bind:value="station.stop_name">
+							 {{ station.stop_name }}
+						  </option>
+					   </select>
+				   </div>
+				   </br>
+				   <div class='stationlist'>
+					   <label for='stationList'>Stations to Display</br>(multiple)</label>
+					   </br>
+					   <select id='stationlist' v-model='stationList' multiple>
+						  <option v-for="station in stations" v-bind:value="station.stop_name">
+							 {{ station.stop_name }}
+						  </option>
+					   </select>
+				   </div>
+		       </div>
+
+		       <div class='contain5lr'>
+				   <div class='direction'>
+					   <label>Direction</label>
+					   </br>
+					   <input type='radio' id='inbound' value="Inbound" v-model='direction'>
+					   <label for='inbound'>Inbound</label>
+						</br>
+					   <input type='radio' id='outbound' value="Outbound" v-model='direction'>
+					   <label for='outbound'>Outbound</label>
+				   </div>
+
+				   <div class='contain10'>
+					   <label>Days</label>
+					   </br>
+					   <input type='radio' id='m1' value="M1" v-model='dayid'>
+					   <label for='m1'>Mon,Tue,Wed,Thur,Fri</label>
+						</br>
+					   <input type='radio' id='m2' value="M2" v-model='dayid'>
+					   <label for='m2'>Fri</label>
+						</br>
+					   <input type='radio' id='m3' value="M3" v-model='dayid'>
+					   <label for='m3'>Sat</label>
+						</br>
+					   <input type='radio' id='m4' value="M4" v-model='dayid'>
+					   <label for='m4'>Sun</label>
+						</br>
+					   <input type='radio' id='m5' value="M5" v-model='dayid'>
+					   <label for='m5'>Mon,Tue,Wed,Thur</label>
+				   </div>
+               </div>
+
+			   <div class='contain5'>
+			      <div class='contain5lr'>
+				     <label for='starttime'>Start Time</label>
+				     </br>
+				     <input type='time' name='starttime' v-model='starttime'>
+				  </div>
+				  <div class='contain5lr'>
+				     <label for='endtime'>End Time</label>
+				     </br>
+				     <input type='time' name='endtime' v-model='endtime'>
+				  </div>
+			   </div>
+		    </div>
+          </br>
+        </template>
+
+
+		    <div class='traingrid'>
+		      <div class='viewname'>
+		           {{ direction }}
+		      </div>
+				<div v-for="train in trains" class='trainentry'>
+              <a href="javascript:void(0);" v-on:click="getStatus(train.trainnum)">
+				      <div class='trainentryname' >
+					       {{ train.trainnum }}
+					   </div>
+					   </br>
+					   <div class='trainentryname'>
+						   <div v-for="stop in train.stoptimes">
+							   {{ stopName(stop.stop_id) }}
+							   {{ time24to12(stop.departure_time.slice(0,5)) }}
+					     </div>
+					     <template v-if='train.nextStop'>
+					        <div>Next Stop: {{ train.nextStop }}</div>
+						     <div>Mins Late: {{ train.late }}</div>
+                    </template>
+						   <!-- <div class='map'><img v-bind:src="train.mapUrl"></div> -->
+                  </div>
+              </a>
+              <template v-if='train.lat'>
+                 <div class='map' v-bind:id="'map'+train.trainnum"></div>
+              </template>
+				</div>
+			</div>
+
+			<div class='footer'>
+			   <template v-if='calendar[0]'>
+			      septa data &nbsp; start: {{ calendar[0].start_date }} &nbsp; end: {{ calendar[0].end_date  }}
+			   </template>
+			   <template v-if='lastsearchDuration'>
+			      <div>
+			         last search time:&nbsp; {{ lastsearchDuration.toFixed(2) }}
+			      </div>
+			   </template>
+			</div>
+		</div>
+		<div id='debug' class='debug'></div>
+   </body>
+   <script type='text/javascript' src='septavue.js?ver=8'></script>
+   <script type='text/javascript' src="maps.js "></script>
+<html>

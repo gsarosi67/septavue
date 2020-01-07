@@ -1,0 +1,24 @@
+{
+  "name": "raildataservice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "raildataservice.js",
+  "dependencies": {
+    "aws-sdk": "^2.163.0",
+    "graphql-request": "^1.4.0",
+    "httpdispatcher": "^2.1.0",
+    "node-fetch": "^1.7.3",
+    "node-inspect": "^1.11.2",
+    "promisify-node": "^0.4.0",
+    "stream-buffers": "^3.0.1",
+    "unzip": "^0.1.11"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node raildataservice.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

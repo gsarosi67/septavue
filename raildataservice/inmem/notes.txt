@@ -1,0 +1,189 @@
+		/*
+		    Rail data is now in GitHub!
+		    
+		    https://github.com/septadev/GTFS
+		    
+		    
+		    
+		    
+		     In Phase 2 we should add of the information to the a database
+		     
+		     Using dynamoDB.  Not sure if this is the right choice or not.  The current object structure
+		     that is created allows for fast look up because I use javascript objects and take advantage 
+		     of use the properties names as an index.   
+		     
+		     the tripdays object has 5 members which each represent a day code from the schedule data:
+		     
+		     tripdays:
+		     tripdays.M1:  Monday-Friday
+		     tripdays.M2:  Saturday
+		     tripdays.M3:  Sunday
+		     tripdays.M4:  Friday
+		     tripdays.M5:  Monday-Thursday
+		     
+		     Each day code property is also an object with a trains property which is a list trains for that day code.  But the list
+		     is not an array but another object and each property corresponds to a train, and each one of these is also an object.
+		     
+		     tripdays.M1.trains.201.trainnum
+		     tripdays.M1.trains.201.direction
+		     tripdays.M1.trains.201.stops
+		     
+		     Each train object has a list of stops that is also an object:
+		     
+		     tripdays.M1.trains.201.stops.90004
+		     tripdays.M1.trains.201.stops.90005
+		     tripdays.M1.trains.201.stops.90006
+		     
+		     Each stop is also an object with the detail about the stop:
+		     
+		     tripdays.M1.trains.201.stops.90004.trip_id
+		     tripdays.M1.trains.201.stops.90004.arrival_time
+		     tripdays.M1.trains.201.stops.90004.departure_time
+		     tripdays.M1.trains.201.stops.90004.stop_id
+		     tripdays.M1.trains.201.stops.90004.stop_sequence
+		     tripdays.M1.trains.201.stops.90004.pickup_type
+		     tripdays.M1.trains.201.stops.90004.dropoff_type
+		     
+		     This structure allows for a very quick search. 
+		     If you are looking for all of the trains
+		     that travel on Monday-Friday that stop at Berwyn and want the departure_time for each train
+		     for the Berwyn and Suburban Station stops, then you loop once through each train in 
+		     tripdays.M1 and simply see if 90508 exists.
+		     
+		     for (train in tripdays[dayid].trains) {
+		        if (tripdays['M1'].trains[train].stops['90508'] != undefined)
+		        
+		    
+		    Using DyanmoDB or any other database I want to avoid searches to search through
+		    long tables.  Not exactly sure how to do this.
+		    
+		    First thought:
+		    
+		    Create a table for each of the nested objects below.  The primary key for each table will 
+		    need to be a combination of the property names, for example:
+		    
+		    Table 1 TripDays:  Primary Key: dayid (M1,M2,M3,M4,M5)
+		                       Each row will be dayid_trainnum: M1_201, M1_202, M1_203
+		                       
+		    Table 2 Trains: Primary Key: dayid_trainnum (M1_201,M1_202)
+		                    Each row will be 
+		     
+		     Another thought:
+		     
+		     What if we just have one table and the primary key will be: dayid_trainnum_direction_stopid
+		     
+		     Each row would be:
+		     key  | dayid | trainnum | direction | stopid | tripid | arrival_time | departure_time | stop_sequence | pickup_type | drop_off_type
+		     
+		     
+		     How would you do the same search as above?
+		     
+		     I don't think this is the right way to do it.  The problem is when I want to search for trains with that stop at 
+		     a specific station, it would be difficult since I don't know that train numbers.
+		     
+		     What is better, less larger tables, or more smaller tables?  I think this depends on the data and the application.
+		     
+		     Third thought:
+		     
+		     Does it make more sense to have multiple tables for each day/direction combination.  For searches in the app, you always 
+		     know the dayid and the direction, so why not organize the data so you are only searching in the day/direction
+		     that you care about.
+		     
+		     What about 10 total tables.  2 types of tables:  
+		     
+		     trains_by_stop:  Primary Key: direction_stopid
+		                      each item is a list of train numbers
+		                      
+		     stops_by_train:  Primary Key: direction_trainnum
+		                      each item is a list of stops documents containing the stop information
+		                      
+		     one table of each type for each dayid, i.e. M1-M5
+		     
+		     How would you do the same query as above?
+		     
+		     First query the M1 trains_by_stop table for the primary key 0_90508, the results will
+		     be a list of trains that stop at station 90508 (Berwyn) on M-F inbound.
+		     
+		     2nd query the M1 stops_by_train for each train in the result list primary key 0_trainnum.
+		     
+		     This is result in a query for each train in the list, sounds slow and expensive.
+		     
+		     Is there a way to do one query and get all of the results?
+		     
+		     I think that you would have to query (or maybe scan) for all results and then apply a filter. This should 
+		     reduce the call to one call from client to server, but the reads from the database will still be expensive.
+		     
+		     Maybe a relational database would be better?  Maybe, I think I should try both and compare results.
+		     
+		     
+		     
+		            - need some process to determine the existence of new schedule data
+         - data is now in GitHub : https://github.com/septadev/GTFS
+         - should be an API to call to get updates
+             - v4 of the Github APIs use GraphQL, not sure how to find the latest release
+             - use this?
+               query {
+				  repository(owner:"septadev", name: "GTFS") {
+					releases(last: 1) {
+					  nodes {
+						name,
+						id,
+						updatedAt,
+						resourcePath,
+						tag {
+						  id
+						}
+					  }
+					}
+				  }
+				}
+							
+				Response:
+				{
+				  "data": {
+					"repository": {
+					  "releases": {
+						"nodes": [
+						  {
+							"name": "November 13th, 2017 Schedule Release",
+							"id": "MDc6UmVsZWFzZTg0OTQwMzA=",
+							"updatedAt": "2017-11-13T15:56:38Z",
+							"resourcePath": "/septadev/GTFS/releases/tag/v20171113",
+							"tag": {
+							  "id": "MDM6UmVmNDA1NTc1NTg6djIwMTcxMTEz"
+							}
+						  }
+						]
+					  }
+					}
+				  }
+				}
+			- with this information, how do I get a URL to the updated zip file?
+			    - the resourcePath is a path to an HTML document that has a link to the updated
+			      zip file.  The URL to this zip file looks like this:
+			            - https://github.com/septadev/GTFS/releases/download/v20171113/gtfs_public.zip
+			    - not sure if this is reliable, but it looks like I could just use the resourcePath
+			      and replace "tag" with "download" and add "/gtfs_public.zip" to the end.
+			    - this is the path for now...
+			- need to figure out authentication with the github api.
+			- once I get the zip file, I need to extract it
+			    - there are various node libs for doing this, pick one:
+			       - node-zip, node-stream-zip, extract-zip
+			
+         - alternative to GraphQL api is just to use, https://github.com/septadev/GTFS/releases.atom
+
+		     
+         */ 
+         
+         
+         
+         
+         user
+public_repo
+repo
+repo_deployment
+repo:status
+read:repo_hook
+read:org
+read:public_key
+read:gpg_key
