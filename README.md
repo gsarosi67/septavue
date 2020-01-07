@@ -21,3 +21,7 @@ The application is broken in the 3 separate modules:
 ## Additional information
 
 * For train status information the application calls (https://www.septastats.com/api)
+* The Google Maps API (https://developers.google.com/maps/documentation/javascript/tutorial) is used to display a map of the current train location.
+
+## To Do
+* Use Webhooks for updating the train schedule
