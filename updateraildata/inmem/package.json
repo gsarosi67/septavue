@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "graphql-request": "^1.4.0",
-    "node-fetch": "^1.7.3",
+    "node-fetch": "^2.6.1",
     "promisify-node": "^0.4.0",
     "stream-buffers": "^3.0.1",
     "unzip": "^0.1.11"
