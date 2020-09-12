@@ -7,7 +7,7 @@
     "aws-sdk": "^2.163.0",
     "graphql-request": "^1.4.0",
     "httpdispatcher": "^2.1.0",
-    "node-fetch": "^1.7.3",
+    "node-fetch": "^2.6.1",
     "node-inspect": "^1.11.2",
     "promisify-node": "^0.4.0",
     "stream-buffers": "^3.0.1",
