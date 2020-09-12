@@ -11,7 +11,7 @@
   "dependencies": {
     "aws-sdk": "^2.164.0",
     "httpdispatcher": "^2.1.1",
-    "node-fetch": "^1.7.3",
+    "node-fetch": "^2.6.1",
     "promisify-node": "^0.4.0",
     "url": "^0.11.0"
   }
